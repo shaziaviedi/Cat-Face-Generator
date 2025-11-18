@@ -1,1 +1,34 @@
 # Cat-Face-Generator
+
+Design Process
+I began with two digital sketches on a 400×400 grid: a “maximum” cat face and a “minimum” cat face. These drawings established the limits of my form—how wide the head could stretch, how much the ears could tilt, and the smallest/largest proportions for eyes, nose, mouth, and whiskers. Translating those lines into code, I used closed Bézier paths for the head, ears, and fur markings; open Bézier paths for the jaw curve and whiskers; and ellipses for irises and pupils.
+
+From there, I parameterized each feature by pairing the min and max versions of every control point. On each mouse click, the program samples between those bounds to create a new variation. I added a second layer of interaction by letting the eyes subtly follow the cursor, which makes the cat feel alert—like it’s tracking a toy.
+
+This project was as much about shaping a system as it was about drawing. Most of my time went into testing small changes, noticing where the form broke, and then writing helpers or constraints so the next set of random values still looked intentional.
+
+Key Challenges and How I Resolved Them
+
+1. Bézier seams and “cracks” at the outline
+   Randomizing all control points independently sometimes created gaps or sharp kinks where a closed shape returns to its start. I solved this in two ways: (a) always closing the last Bézier back to the starting vertex, and (b) tightening the ranges for a few critical points. I also enforced an “outward cheek” rule relative to the head’s center so the silhouette remains convincingly feline instead of accidentally caved in.
+
+2. Eye elements bleeding outside the lids (and even outside the head)
+   Once the irises and pupils began tracking the cursor, they could drift past the eye whites. I wrote a general clipping utility that converts any stored Bézier path into a canvas clip. I render the eye whites, iris, and pupil while clipped to each eye, and render ears and fur patterns while clipped to the head. This kept the layering clean without hard-coding many special cases.
+
+3. Mouth detaching from the nose
+   Some random combinations created a slight gap at the philtrum. I anchored the mouth’s first control point to the nose tip so they always connect.
+
+4. Chaotic whiskers
+   Fully random whiskers looked messy. I added a “tidy” function that aligns whisker roots to a neat column just left or right of the nose, enforces a minimum reach, bows the handles outward, and limits vertical wiggle. The result still looks varied but more deliberate.
+
+5. Pupil/iris proportion drift
+   To avoid pupils overtaking the iris, I capped pupil size as a fraction of the iris diameter on each generation.
+
+What I Learned About This Form
+• Small constraints create large perceptions of coherence. Rules like “cheeks must bulge outward past center” preserve the species identity across many random outcomes.
+• Clipping is crucial for organic, layered drawings. It let me separate “where something should be drawn” from “what it looks like,” which made the system easier to reason about.
+• Character emerges from relationships, not just sizes. Eye spacing relative to head width, nose placement relative to mouth curvature, and whisker span relative to ear tilt communicate expression more than any single dimension.
+• Asymmetry in parameter ranges matters. Some points can vary widely (outer cheek) while others need tighter ranges (top of the head) to avoid uncanny shapes.
+• Interaction changes how we read the drawing. Even subtle eye-tracking immediately adds life and holds attention, reinforcing the face-ness of the form.
+
+If I extend this project, I’d like to weight color palettes to improve contrast between fur and markings, vary ear interiors, and define a few higher-level “style modes” (e.g., round vs. angular) that switch sets of constraints, not just widen ranges. Overall, the assignment shifted my mindset from “making a drawing” to “designing a space of drawings,” and that felt like the central lesson.
